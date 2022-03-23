@@ -44,6 +44,7 @@ function HomeVM() {
     await fetchRandomJoke();
 
     while (numOdRetries < 5 && likedJokes[joke.id]) {
+      setNumOdRetries(numOdRetries++);
       await fetchRandomJoke();
     }
 
@@ -55,6 +56,7 @@ function HomeVM() {
     await fetchRandomJoke();
 
     while (numOdRetries < 5 && deslikedJokes[joke.id]) {
+      setNumOdRetries(numOdRetries++);
       await fetchRandomJoke();
     }
 
