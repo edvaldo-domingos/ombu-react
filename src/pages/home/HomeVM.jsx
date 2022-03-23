@@ -7,6 +7,7 @@ function HomeVM() {
   const [likedJokes, setLikedJokes] = useState({});
   const [deslikedJokes, setDeslikedJokes] = useState({});
   const [numOdRetries, setNumOdRetries] = useState(0);
+  const [showLikedJokes, setShowLikedJokes] = useState(false);
 
   //   category: "Spooky"
   //   delivery: "So they can keep their ghoulish figures."
@@ -49,7 +50,7 @@ function HomeVM() {
     }
 
     setNumOdRetries(0);
-    setLikedJokes({ ...likedJokes, [joke.id]: joke.id });
+    setLikedJokes({ ...likedJokes, [joke.id]: joke });
   };
 
   const onClickDeslikeJoke = async () => {
@@ -61,8 +62,10 @@ function HomeVM() {
     }
 
     setNumOdRetries(0);
-    setLikedJokes({ ...likedJokes, [joke.id]: joke.id });
+    setLikedJokes({ ...likedJokes, [joke.id]: joke });
   };
+
+  const onClickShowLikedJokes = () => {};
 
   return {
     fetchRandomJoke,
@@ -71,6 +74,9 @@ function HomeVM() {
     setLikedJokes,
     onClickLikeJoke,
     onClickDeslikeJoke,
+    onClickShowLikedJokes,
+    setShowLikedJokes,
+    showLikedJokes,
   };
 }
 
