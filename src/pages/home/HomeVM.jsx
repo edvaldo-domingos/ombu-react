@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BASE_URL } from "../../utils/constants";
+import { BASE_URL, BASE_URL_V2, LIKE } from "../../utils/constants";
 
 function HomeVM() {
   const [error, setError] = useState(null);
@@ -8,6 +8,10 @@ function HomeVM() {
   const [deslikedJokes, setDeslikedJokes] = useState({});
   const [numOdRetries, setNumOdRetries] = useState(0);
   const [showLikedJokes, setShowLikedJokes] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [language, setLanguage] = useState("");
+  const [types, SetTypes] = useState([]);
+  const [search, setSearch] = useState("");
 
   //   category: "Spooky"
   //   delivery: "So they can keep their ghoulish figures."
@@ -41,31 +45,89 @@ function HomeVM() {
     }
   };
 
-  const onClickLikeJoke = async () => {
-    await fetchRandomJoke();
+  const getUrl = () => {
+    let url = `${BASE_URL_V2}`;
+    const safeMode = "safe-mode";
 
-    while (numOdRetries < 5 && likedJokes[joke.id]) {
-      setNumOdRetries(numOdRetries++);
-      await fetchRandomJoke();
+    // "https://v2.jokeapi.dev/joke/ Any?safe-mode"
+
+    if (categories?.length > 0) {
+      categories.forEach((category, index) => {
+        const isLastItem = index === categories.length - 1;
+        url += category;
+        if (!isLastItem) {
+          url += `,`;
+        }
+      });
+    } else {
+      url += `Any`;
     }
 
-    setNumOdRetries(0);
-    setLikedJokes({ ...likedJokes, [joke.id]: joke });
+    if (language) {
+      url += `?lang=${language}`;
+    } else {
+      url += `?lang=en`;
+    }
+
+    if (types.length === 1) {
+      const onlyType = types[0];
+      url += `&type=${onlyType}`;
+    }
+
+    if (search) {
+      url += `&contains=${search}`;
+    }
+
+    if (language || search || types.length === 1) {
+      url += `&${safeMode}`;
+    } else {
+      url += `?${safeMode}`;
+    }
+
+    console.log(url);
+  };
+
+  const onClickLikeJoke = async () => {
+    if (joke?.id) {
+      setLikedJokes({ ...likedJokes, [joke.id]: joke });
+    }
+
+    await fetchRandomJoke();
+
+    const numberOfRetries = 5;
+
+    for (let start = 0; start < numberOfRetries; start++) {
+      if (!likedJokes[joke.id] || !deslikedJokes[joke.id]) break;
+      await fetchRandomJoke();
+    }
   };
 
   const onClickDeslikeJoke = async () => {
-    await fetchRandomJoke();
-
-    while (numOdRetries < 5 && deslikedJokes[joke.id]) {
-      setNumOdRetries(numOdRetries++);
-      await fetchRandomJoke();
+    if (joke?.id) {
+      setDeslikedJokes({ ...deslikedJokes, [joke.id]: joke });
     }
 
-    setNumOdRetries(0);
-    setLikedJokes({ ...likedJokes, [joke.id]: joke });
+    await fetchRandomJoke();
+    const numberOfRetries = 5;
+
+    for (let start = 0; start < numberOfRetries; start++) {
+      if (!deslikedJokes[joke.id] || !likedJokes[joke.id]) break;
+      await fetchRandomJoke();
+    }
   };
 
   const onClickShowLikedJokes = () => {};
+
+  const deleteJoke = (clickedJoke) => {
+    const newJokes = { ...likedJokes };
+    delete newJokes[clickedJoke.id];
+    setLikedJokes(newJokes);
+  };
+
+  const onClickSearch = () => {
+    const url = getUrl();
+    // fetchRandomJoke()
+  };
 
   return {
     fetchRandomJoke,
@@ -77,6 +139,16 @@ function HomeVM() {
     onClickShowLikedJokes,
     setShowLikedJokes,
     showLikedJokes,
+    deleteJoke,
+    categories,
+    setCategories,
+    onClickSearch,
+    language,
+    setLanguage,
+    types,
+    SetTypes,
+    search,
+    setSearch,
   };
 }
 
